@@ -35,6 +35,41 @@ const createUser = asyncHandler(async (req, res) => {
   }
 });
 
+// login user
+
+const loginUser = asyncHandler(async (req, res) => {
+  const { email, password } = req.body;
+
+  if (!email || !password) {
+    throw createHttpError(400, "All fields are mandatory");
+  }
+
+  const user = await User.findOne({ email });
+  // const accessToken = jwt.sign(
+  //   {
+  //     user: {
+  //       id: user.id,
+  //       name: user.name,
+  //       email: user.email,
+  //     },
+  //   },
+  //   process.env.ACCESS_TOKEN_SECRET,
+  //   { expiresIn: "1h" }
+  // );
+  if (user && (await bcrypt.compare(password, user.password))) {
+    res.status(200).json(user);
+  } else {
+    throw createHttpError(401, "Invalid email or password");
+  }
+});
+
+// current user
+const currentUser = asyncHandler(async (req, res) => {
+  res.json(req.user);
+});
+
 module.exports = {
   createUser,
+  loginUser,
+  currentUser,
 };
